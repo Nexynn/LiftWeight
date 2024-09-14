@@ -8,9 +8,14 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 export default function TabLayout() {
   const colorScheme = useColorScheme();
 
+  const hide = 1
+
   return (
     <Tabs
       screenOptions={{
+          tabBarStyle: {
+                    display: hide ? "none" : "flex",
+                  },
         tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: false,
       }}>
