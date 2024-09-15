@@ -3,6 +3,7 @@ import { View, Image, Text, TouchableOpacity, StyleSheet, SafeAreaView } from 'r
 import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
 import { useFonts, InknutAntiqua_400Regular } from '@expo-google-fonts/inknut-antiqua';
 
+
 export default function App() {
   const [fontsLoaded] = useFonts({
       InknutAntiqua_400Regular,
@@ -48,21 +49,8 @@ export default function App() {
         </TouchableOpacity>
       </View>
 
-      {/* Footer avec icônes */}
-      <View style={styles.footer}>
-        <TouchableOpacity style={styles.iconButton} onPress={handlePress}>
-          <Image
-            source={require('../../assets/icons/personalBest-icon.png')}
-            style={styles.icon}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.iconButton} onPress={handlePress}>
-          <Image
-            source={require('../../assets/icons/chart-icon.png')}
-            style={styles.icon}
-          />
-        </TouchableOpacity>
-      </View>
+
+
     </SafeAreaView>
   );
 }
@@ -108,18 +96,4 @@ const styles = StyleSheet.create({
     fontFamily: 'InknutAntiqua_400Regular',
     color: 'black',
   },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    padding: 30,
-  },
-  iconButton: {
-    backgroundColor: '#ccc',
-    padding: 15,
-    borderRadius: 10,
-  },
-  icon: {
-      width: 80,  // Taille de l'icône
-      height: 80,  // Taille de l'icône
-    },
 });
