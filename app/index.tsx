@@ -1,19 +1,42 @@
 import * as React from 'react';
-import { Text, View, StyleSheet, Dimensions, TouchableOpacity} from 'react-native';
+import { Text, View, StyleSheet, ScrollView, Dimensions, TouchableOpacity} from 'react-native';
 import { TabView, SceneMap } from 'react-native-tab-view';
 import { AntDesign } from '@expo/vector-icons';
 
-const FirstRoute = () => (
+
+
+const FirstRoute = () => {
+  const [buttons, setButtons] = React.useState<string[]>([]); // Indiquer que buttons est un tableau de chaînes
+
+  // Fonction pour ajouter un nouveau bouton
+  const addButton = () => {
+    setButtons([...buttons, `Exercise ${buttons.length + 1}`]);
+  };
+
+  return (
+
   <View style={[styles.container, { backgroundColor: '#303030' }]}>
     <Text style={styles.date}>TODAY</Text>
 
-    {/* Bouton Add Exercise */}
-    <TouchableOpacity style={styles.button}>
-      <AntDesign name="plus" size={34} color="black" style={styles.icon} />
-      <Text style={styles.buttonText}>Add exercise</Text>
-    </TouchableOpacity>
-  </View>
-);
+    {/* ScrollView pour permettre le défilement */}
+    <ScrollView contentContainerStyle={styles.scrollContainer}>
+        {/* Affichage dynamique des boutons d'exercice */}
+        {buttons.map((buttonText, index) => (
+          <TouchableOpacity key={index} style={styles.button}>
+            <AntDesign name="plus" size={34} color="black" style={styles.icon} />
+            <Text style={styles.buttonText}>{buttonText}</Text>
+          </TouchableOpacity>
+        ))}
+
+        {/* Bouton principal pour ajouter des exercices */}
+        <TouchableOpacity style={styles.button} onPress={addButton}>
+          <AntDesign name="plus" size={34} color="black" style={styles.icon} />
+          <Text style={styles.buttonText}>Add exercise</Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </View>
+  );
+};
 
 const SecondRoute = () => (
   <View style={[styles.container, { backgroundColor: '#303030' }]}>
@@ -56,6 +79,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
+    paddingBottom: 60,
   },
   date: {
     fontSize: 30,
@@ -63,6 +87,10 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontFamily: 'InknutAntiqua_400Regular',
     marginBottom: 50,
+  },
+  scrollContainer: {
+    flexGrow: 1, // Permet à ScrollView d'occuper tout l'espace nécessaire
+    alignItems: 'center', // Centre les éléments
   },
   button: {
     flexDirection: 'row', // Place l'icône et le texte côte à côte
