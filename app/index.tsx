@@ -7,38 +7,43 @@ import BenchIcon from '../assets/icons/bench.png'; // Exemple d'image locale
 
 // Liste des icônes pour les exercices
 const exerciseIcons = [
-  { id: 1, name: 'pushpin' },  // Remplacer par d'autres icônes
-  { id: 2, name: 'smileo' },
-  { id: 3, name: 'rocket1' },
-  { id: 4, name: 'frowno' },
-  { id: 5, name: 'bench', iconComponent: BenchIcon },  // Icône personnalisée
+  { id: 1, name: 'pushpin', type: 'antdesign' },  // Remplacer par d'autres icônes
+  { id: 2, name: 'smileo' , type: 'antdesign'},
+  { id: 3, name: 'rocket1', type: 'antdesign' },
+  { id: 4, name: 'frowno' , type: 'antdesign'},
+  { id: 5, name: 'bench', iconComponent: BenchIcon, type: 'custom'},  // Icône personnalisée
   // Ajouter d'autres icônes ici
 ];
 
 const FirstRoute = () => {
-  const [buttons, setButtons] = React.useState<{ name: string, icon: string | null }[]>([]); // Stocker le nom et l'icône
+  const [buttons, setButtons] = React.useState<{ id: number; iconId: number | null }[]>([]); // Stocke les boutons avec leur icône
   const [modalVisible, setModalVisible] = React.useState(false);
-  const [selectedIcon, setSelectedIcon] = React.useState<string | null>(null); // Gère l'icône sélectionnée
-
+  const [selectedIconId, setSelectedIconId] = React.useState<number | null>(null); // ID de l'icône sélectionnée
+  
 
   // Fonction pour confirmer l'exercice et masquer le modal
   const confirmExercise = () => {
-    if (selectedIcon) {
+    if (selectedIconId) {
       setModalVisible(false);
-      setButtons([...buttons, { name: `Exercise ${buttons.length + 1}`, icon: selectedIcon }]); // Ajoute un nouvel exercice avec l'icône sélectionnée
-      setSelectedIcon(null); // Réinitialiser l'icône sélectionnée après ajout
+      setButtons([...buttons, { id: buttons.length + 1, iconId: selectedIconId }]);
+      setSelectedIconId(null); // Réinitialise l'icône sélectionnée après ajout
     }
   };
 
   // Fonction pour annuler et masquer le modal
   const cancelExercise = () => {
     setModalVisible(false); // Masque le modal sans ajouter d'exercice
-    setSelectedIcon(null); // Réinitialise l'icône sélectionnée
+    setSelectedIconId(null); // Réinitialise l'icône sélectionnée
   };
   
   // Fonction pour ajouter un nouveau bouton
-  const addButton = () => {
+  const addButtonMenu = () => {
     setModalVisible(true);
+  };
+
+  // Fonction pour sélectionner une icône
+  const selectIcon = (id: number) => {
+    setSelectedIconId(id);
   };
 
   return (
@@ -48,15 +53,21 @@ const FirstRoute = () => {
       {/* ScrollView qui contient les exercices ajoutés */}
       {!modalVisible && (
         <ScrollView contentContainerStyle={styles.scrollContainer}>
-          {buttons.map((button, index) => (
-            <TouchableOpacity key={index} style={styles.button}>
-              {/* Affiche l'icône sélectionnée à la place de l'icône plus */}
-              <AntDesign name={button.icon || 'plus'} size={34} color="black" style={styles.icon} />
-              <Text style={styles.buttonText}>{button.name}</Text>
+          {buttons.map((button) => {
+          const icon = exerciseIcons.find((icon) => icon.id === button.iconId); // Trouve l'icône correspondante
+          return (
+            <TouchableOpacity key={button.id} style={styles.button}>
+              {icon && icon.type === 'antdesign' ? (
+                <AntDesign name={icon.name || "plus"} size={34} color="black" style={styles.icon} />
+              ) : icon && icon.iconComponent ? (
+                <Image source={icon.iconComponent} style={{ width: 34, height: 34 }} />
+              ) : null}
+              <Text style={styles.buttonText}>Exercise {button.id}</Text>
             </TouchableOpacity>
-          ))}
+          );
+        })}
 
-          <TouchableOpacity style={styles.button} onPress={addButton}>
+          <TouchableOpacity style={styles.button} onPress={addButtonMenu}>
             <AntDesign name="plus" size={34} color="black" style={styles.icon} />
             <Text style={styles.buttonText}>Add exercise</Text>
           </TouchableOpacity>
@@ -80,16 +91,15 @@ const FirstRoute = () => {
             numColumns={3}  // 3 colonnes d'icônes
             renderItem={({ item }) => (
               <TouchableOpacity
-                style={[
-                  styles.iconButton,
-                  selectedIcon === item.name && styles.iconSelected, // Met en surbrillance l'icône sélectionnée
+                style={[styles.iconButton,
+                  selectedIconId === item.id && styles.iconSelected,
                 ]}
-                onPress={() => setSelectedIcon(item.name)}
+                onPress={() => setSelectedIconId(item.id)}
               >
-                {item.iconComponent ? (
-                  <Image source={item.iconComponent} style={{ width: 50, height: 50 }} />
+                {item.type === 'antdesign' ? (
+                  <AntDesign name={item.name} size={50} color="black" />
                 ) : (
-                  <AntDesign name={item.name} size={50} color={selectedIcon === item.name ? 'blue' : 'black'} />
+                  <Image source={item.iconComponent} style={{ width: 50, height: 50 }} />
                 )}
               </TouchableOpacity>
             )}
