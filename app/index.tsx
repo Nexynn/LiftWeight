@@ -1,6 +1,7 @@
 import * as React from 'react';
-import { Text, View, StyleSheet, ScrollView, Dimensions, TouchableOpacity, FlatList, Modal, Image} from 'react-native';
+import { Text, View, StyleSheet, ScrollView, Dimensions, TouchableOpacity, FlatList, Modal, Image, TextInput, ActivityIndicator} from 'react-native';
 import { TabView, SceneMap } from 'react-native-tab-view';
+import { useFonts, InknutAntiqua_400Regular } from '@expo-google-fonts/inknut-antiqua';
 import { AntDesign } from '@expo/vector-icons';
 
 import BenchIcon from '../assets/icons/bench.png'; // Exemple d'image locale
@@ -15,46 +16,62 @@ const exerciseIcons = [
   // Ajouter d'autres icônes ici
 ];
 
+
 const FirstRoute = () => {
-  const [buttons, setButtons] = React.useState<{ id: number; iconId: number | null }[]>([]); // Stocke les boutons avec leur icône
+  const [buttons, setButtons] = React.useState<{ id: number; iconId: number | null, mode: string, series: number, reps: number, weight: number, time: number }[]>([]);
   const [modalVisible, setModalVisible] = React.useState(false);
-  const [selectedIconId, setSelectedIconId] = React.useState<number | null>(null); // ID de l'icône sélectionnée
-  
+  const [selectedIconId, setSelectedIconId] = React.useState<number | null>(null);
+  const [selectedMode, setSelectedMode] = React.useState<string>('weighted');
+  const [series, setSeries] = React.useState<number>(0);
+  const [reps, setReps] = React.useState<number>(0);
+  const [weight, setWeight] = React.useState<number>(0);
+  const [time, setTime] = React.useState<number>(0);
 
   // Fonction pour confirmer l'exercice et masquer le modal
   const confirmExercise = () => {
     if (selectedIconId) {
       setModalVisible(false);
-      setButtons([...buttons, { id: buttons.length + 1, iconId: selectedIconId }]);
-      setSelectedIconId(null); // Réinitialise l'icône sélectionnée après ajout
+      setButtons([...buttons, {
+        id: buttons.length + 1,
+        iconId: selectedIconId,
+        mode: selectedMode,
+        series: series,
+        reps: reps,
+        weight: weight,
+        time: time,
+      }]);
+      setSelectedIconId(null);
+      resetModalInputs();
     }
   };
 
-  // Fonction pour annuler et masquer le modal
-  const cancelExercise = () => {
-    setModalVisible(false); // Masque le modal sans ajouter d'exercice
-    setSelectedIconId(null); // Réinitialise l'icône sélectionnée
-  };
-  
-  // Fonction pour ajouter un nouveau bouton
-  const addButtonMenu = () => {
-    setModalVisible(true);
+  // Fonction pour réinitialiser les champs du modal
+  const resetModalInputs = () => {
+    setSelectedIconId(null);
+    setSelectedMode('weighted');
+    setSeries(0);
+    setReps(0);
+    setWeight(0);
+    setTime(0);
   };
 
-  // Fonction pour sélectionner une icône
-  const selectIcon = (id: number) => {
-    setSelectedIconId(id);
+  const cancelExercise = () => {
+    setModalVisible(false);
+    resetModalInputs();
+  };
+
+  const addButtonMenu = () => {
+    setModalVisible(true);
   };
 
   return (
     <View style={[styles.container, { backgroundColor: '#303030' }]}>
       <Text style={styles.date}>TODAY</Text>
 
-      {/* ScrollView qui contient les exercices ajoutés */}
       {!modalVisible && (
         <ScrollView contentContainerStyle={styles.scrollContainer}>
-          {buttons.map((button) => {
-          const icon = exerciseIcons.find((icon) => icon.id === button.iconId); // Trouve l'icône correspondante
+        {buttons.map((button) => {
+          const icon = exerciseIcons.find((icon) => icon.id === button.iconId);
           return (
             <TouchableOpacity key={button.id} style={styles.button}>
               {icon && icon.type === 'antdesign' ? (
@@ -62,16 +79,36 @@ const FirstRoute = () => {
               ) : icon && icon.iconComponent ? (
                 <Image source={icon.iconComponent} style={{ width: 34, height: 34 }} />
               ) : null}
+              
+              {/* Nom de l'exercice */}
               <Text style={styles.buttonText}>Exercise {button.id}</Text>
+      
+              {/* Affichage des détails en fonction du mode */}
+              {button.mode === 'weighted' && (
+                <Text style={styles.exerciseDetails}>
+                  {button.series} Series x {button.reps} Reps - {button.weight} kg
+                </Text>
+              )}
+              {button.mode === 'timed' && (
+                <Text style={styles.exerciseDetails}>
+                  {button.series} Series - {button.time} sec
+                </Text>
+              )}
+              {button.mode === 'body' && (
+                <Text style={styles.exerciseDetails}>
+                  Bodyweight Exercise
+                </Text>
+              )}
             </TouchableOpacity>
           );
         })}
-
-          <TouchableOpacity style={styles.button} onPress={addButtonMenu}>
-            <AntDesign name="plus" size={34} color="black" style={styles.icon} />
-            <Text style={styles.buttonText}>Add exercise</Text>
-          </TouchableOpacity>
-        </ScrollView>
+      
+        <TouchableOpacity style={styles.button} onPress={addButtonMenu}>
+          <AntDesign name="plus" size={34} color="black" style={styles.icon} />
+          <Text style={styles.buttonText}>Add exercise</Text>
+        </TouchableOpacity>
+      </ScrollView>
+      
       )}
 
       {/* Modal pour sélectionner l'exercice */}
@@ -84,16 +121,13 @@ const FirstRoute = () => {
         <View style={styles.modalView}>
           <Text style={styles.modalTitle}>Choose the exercise</Text>
 
-          {/* Grille des icônes d'exercice */}
           <FlatList
             data={exerciseIcons}
             keyExtractor={(item) => item.id.toString()}
-            numColumns={3}  // 3 colonnes d'icônes
+            numColumns={3}
             renderItem={({ item }) => (
               <TouchableOpacity
-                style={[styles.iconButton,
-                  selectedIconId === item.id && styles.iconSelected,
-                ]}
+                style={[styles.iconButton, selectedIconId === item.id && styles.iconSelected]}
                 onPress={() => setSelectedIconId(item.id)}
               >
                 {item.type === 'antdesign' ? (
@@ -106,6 +140,33 @@ const FirstRoute = () => {
             contentContainerStyle={styles.iconContainer}
           />
 
+          {/* Sélection du mode */}
+          <View style={styles.typeButtons}>
+            <TouchableOpacity onPress={() => setSelectedMode('weighted')} style={selectedMode === 'weighted' ? styles.typeButtonActive : styles.typeButton}>
+              <Text>Weighted</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setSelectedMode('timed')} style={selectedMode === 'timed' ? styles.typeButtonActive : styles.typeButton}>
+              <Text>Timed</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setSelectedMode('body')} style={selectedMode === 'body' ? styles.typeButtonActive : styles.typeButton}>
+              <Text>Body</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Affichage des champs en fonction du mode sélectionné */}
+          {selectedMode === 'weighted' && (
+            <View>
+              <TextInput placeholder="Series" keyboardType="numeric" value={series.toString()} onChangeText={(text) => setSeries(Number(text))} style={styles.input} />
+              <TextInput placeholder="Reps" keyboardType="numeric" value={reps.toString()} onChangeText={(text) => setReps(Number(text))} style={styles.input} />
+              <TextInput placeholder="Weight (kg)" keyboardType="numeric" value={weight.toString()} onChangeText={(text) => setWeight(Number(text))} style={styles.input} />
+            </View>
+          )}
+          {selectedMode === 'timed' && (
+            <View>
+              <TextInput placeholder="Series" keyboardType="numeric" value={series.toString()} onChangeText={(text) => setSeries(Number(text))} style={styles.input} />
+              <TextInput placeholder="Time (seconds)" keyboardType="numeric" value={time.toString()} onChangeText={(text) => setTime(Number(text))} style={styles.input} />
+            </View>
+          )}
 
           <View style={styles.modalActions}>
             <TouchableOpacity style={styles.modalButton} onPress={cancelExercise}>
@@ -129,6 +190,10 @@ const SecondRoute = () => (
 );
 
 export default function App() {
+  const [fontsLoaded] = useFonts({
+    InknutAntiqua_400Regular,
+  });
+
   const [index, setIndex] = React.useState(0);
   const [routes] = React.useState([
     { key: 'first', title: 'Hello' },
@@ -170,29 +235,31 @@ const styles = StyleSheet.create({
     top: 40,
     color: '#fff',
     fontFamily: 'InknutAntiqua_400Regular',
-    marginBottom: 70,
+    marginBottom: 50,
   },
   scrollContainer: {
-    flexGrow: 1, // Permet à ScrollView d'occuper tout l'espace nécessaire
-    alignItems: 'center', // Centre les éléments
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
   },
   button: {
-    flexDirection: 'row', // Place l'icône et le texte côte à côte
-    alignItems: 'center',
-    justifyContent: 'center', // Centre l'icône et le texte horizontalement
-    backgroundColor: '#F5F5F5',
-    paddingVertical: 20,
-    paddingHorizontal: 20,
+    backgroundColor: '#f0f0f0',
+    padding: 10,
+    marginVertical: 10,
     borderRadius: 10,
-    marginTop: 20,
-    elevation: 2, // Légère ombre pour effet 3D
-    width: 250, // Largeur fixe du bouton (ajuster selon tes besoins)
+    width: Dimensions.get('window').width * 0.7, // Pour prendre environ 90% de la largeur de l'écran
+    alignItems: 'center',
   },
   icon: {
     marginRight: 10, // Espacement entre l'icône et le texte
   },
   buttonText: {
-    fontSize: 24,
+    fontSize: 21,
+    fontFamily: 'InknutAntiqua_400Regular', // Même typographie pour le bouton
+  },
+  exerciseDetails: {
+    fontSize: 14,
+    color: '#333',
     fontFamily: 'InknutAntiqua_400Regular', // Même typographie pour le bouton
   },
 
@@ -260,6 +327,21 @@ const styles = StyleSheet.create({
   iconContainer: {
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  inputContainer: {
+    marginTop: 20,
+    width: '100%',
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    padding: 10,
+    marginVertical: 10,
+    width: '100%',
+  },
+  selectedType: {
+    backgroundColor: '#ccc',
   },
 
   indicatorContainer: {
