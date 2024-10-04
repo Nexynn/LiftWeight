@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
       borderRadius: 5,
       padding: 10,
       marginVertical: 10,
-      width: '100%',
+      width: Dimensions.get('window').width * 0.3,
     },
     selectedType: {
       backgroundColor: '#ccc',

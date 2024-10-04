@@ -259,21 +259,21 @@ const selectPreset = (presetName: string) => {
         {/* Affichage des champs en fonction du mode sélectionné */}
         {selectedMode === 'weighted' && (
           <View>
-            <TextInput placeholder="Series" keyboardType="numeric" value={series.toString()} onChangeText={(text) => setSeries(Number(text))} style={styles.input} />
-            <TextInput placeholder="Reps" keyboardType="numeric" value={reps.toString()} onChangeText={(text) => setReps(Number(text))} style={styles.input} />
-            <TextInput placeholder="Weight (kg)" keyboardType="numeric" value={weight.toString()} onChangeText={(text) => setWeight(Number(text))} style={styles.input} />
+            <TextInput placeholder="Series" keyboardType="numeric" value={series ? series.toString() : ''} onChangeText={(text) => setSeries(Number(text))} style={styles.input} />
+            <TextInput placeholder="Reps" keyboardType="numeric" value={reps ? reps.toString() : ''} onChangeText={(text) => setReps(Number(text))} style={styles.input} />
+            <TextInput placeholder="Weight (kg)" keyboardType="numeric" value={weight ? weight.toString() : ''} onChangeText={(text) => setWeight(Number(text))} style={styles.input} />
           </View>
         )}
         {selectedMode === 'timed' && (
           <View>
-            <TextInput placeholder="Series" keyboardType="numeric" value={series.toString()} onChangeText={(text) => setSeries(Number(text))} style={styles.input} />
-            <TextInput placeholder="Time (seconds)" keyboardType="numeric" value={time.toString()} onChangeText={(text) => setTime(Number(text))} style={styles.input} />
+            <TextInput placeholder="Series" keyboardType="numeric" value={series ? series.toString() : ''} onChangeText={(text) => setSeries(Number(text))} style={styles.input} />
+            <TextInput placeholder="Time (seconds)" keyboardType="numeric" value={reps ? reps.toString() : ''} onChangeText={(text) => setTime(Number(text))} style={styles.input} />
           </View>
         )}
         {selectedMode === 'body' && (
           <View>
-            <TextInput placeholder="Series" keyboardType="numeric" value={series.toString()} onChangeText={(text) => setSeries(Number(text))} style={styles.input} />
-            <TextInput placeholder="Reps" keyboardType="numeric" value={reps.toString()} onChangeText={(text) => setReps(Number(text))} style={styles.input} />
+            <TextInput placeholder="Series" keyboardType="numeric" value={series ? series.toString() : ''} onChangeText={(text) => setSeries(Number(text))} style={styles.input} />
+            <TextInput placeholder="Reps" keyboardType="numeric" value={reps ? reps.toString() : ''} onChangeText={(text) => setReps(Number(text))} style={styles.input} />
           </View>
         )}
 
