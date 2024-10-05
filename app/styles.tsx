@@ -13,11 +13,9 @@ const styles = StyleSheet.create({
       paddingBottom: 60,
     },
     date: {
-      fontSize: 30,
-      top: 40,
+      fontSize: 20,
       color: '#fff',
       fontFamily: 'InknutAntiqua_400Regular',
-      marginBottom: 60,
     },
     scrollContainer: {
       flexDirection: 'column',

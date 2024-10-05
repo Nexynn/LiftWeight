@@ -21,6 +21,8 @@ const exerciseIcons = [
 
 
 const FirstRoute = () => {
+  const [date, setDate] = React.useState(new Date());
+
   const [presetName, setPresetName] = React.useState<string>('');
   const [presets, setPresets] = React.useState<{ name: string; buttons: any[] }[]>([{ name: 'Clear', buttons: [] }]);
   const [createModalVisible, setCreateModalVisible] = React.useState(false);
@@ -36,25 +38,46 @@ const FirstRoute = () => {
   const [weight, setWeight] = React.useState<number>(0);
   const [time, setTime] = React.useState<number>(0);
 
+  // Fonction pour formater la date (tu peux adapter le format comme tu veux)
+  const formatDate = (date: Date) => {
+    const today = new Date();
+    
+    // Vérifier si la date passée correspond à aujourd'hui
+    if (date.toDateString() === today.toDateString()) {
+      return "Today";
+    }
+    
+    return date.toDateString(); // Exemple : 'Wed Oct 04 2024'
+  };
+
+  // Fonction pour changer la date
+  const changeDate = (days: number) => {
+    setDate((prevDate) => {
+      const newDate = new Date(prevDate);
+      newDate.setDate(newDate.getDate() + days);
+      return newDate;
+    });
+  };
+
   // Fonction pour enregistrer un preset
-const savePreset = () => {
-  if (presetName && !presets.some(p => p.name === presetName)) {
-    setPresets([...presets, { name: presetName, buttons }]); // Enregistrer le preset avec les boutons
-    setPresetName('');
-    setCreateModalVisible(false);
-  }
-};
+  const savePreset = () => {
+    if (presetName && !presets.some(p => p.name === presetName)) {
+      setPresets([...presets, { name: presetName, buttons }]); // Enregistrer le preset avec les boutons
+      setPresetName('');
+      setCreateModalVisible(false);
+    }
+  };
 
   // Fonction pour sélectionner un preset
-const selectPreset = (presetName: string) => {
-  const preset = presets.find(p => p.name === presetName);
-  
-  if (preset) {
-    setButtons(preset.buttons); // Restaurer les boutons du preset sélectionné
-    setSelectedPreset(preset.name); // Mettre à jour le preset sélectionné
-    setSelectModalVisible(false); // Fermer le modal
-  }
-};
+  const selectPreset = (presetName: string) => {
+    const preset = presets.find(p => p.name === presetName);
+    
+    if (preset) {
+      setButtons(preset.buttons); // Restaurer les boutons du preset sélectionné
+      setSelectedPreset(preset.name); // Mettre à jour le preset sélectionné
+      setSelectModalVisible(false); // Fermer le modal
+    }
+  };
 
 
   // Fonction pour confirmer l'exercice et masquer le modal
@@ -101,7 +124,28 @@ const selectPreset = (presetName: string) => {
 
   return (
     <View style={[styles.container, { backgroundColor: '#303030' }]}>
-    <Text style={styles.date}>TODAY</Text>
+      <View style={{ justifyContent: 'center', alignItems: 'center', marginTop: 20, marginBottom: 10 }}>
+        {/* Chevron gauche pour diminuer la date */}
+        <TouchableOpacity 
+          onPress={() => changeDate(-1)} 
+          style={{ position: 'absolute', transform: [{ translateX: -120 }] }}
+        >
+          <AntDesign name="left" size={24} color="white" />
+        </TouchableOpacity>
+
+        {/* Affichage de la date */}
+        <Text style={styles.date}>{formatDate(date)}</Text>
+
+        {/* Chevron droit pour augmenter la date */}
+        <TouchableOpacity 
+          onPress={() => changeDate(1)} 
+          style={{ position: 'absolute', transform: [{ translateX: 120 }] }}
+        >
+          <AntDesign name="right" size={24} color="white" />
+        </TouchableOpacity>
+      </View>
+
+
 
     <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 }}>
       <TouchableOpacity style={styles.iconButtonPreset} onPress={() => setCreateModalVisible(true)}>
