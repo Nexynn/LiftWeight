@@ -38,6 +38,69 @@ const FirstRoute = () => {
   const [weight, setWeight] = React.useState<number>(0);
   const [time, setTime] = React.useState<number>(0);
 
+  React.useEffect(() => {
+    // Récupérer les données de la date actuelle au chargement
+    retrieveDataForDate(formatDateKey(date));
+    retrievePresets();
+  }, []);
+
+  // Formater la date en clé pour sauvegarde ("YYYY-MM-DD")
+  const formatDateKey = (date) => {
+    return date.toISOString().split('T')[0]; // Format "YYYY-MM-DD"
+  };
+
+  // Sauvegarder les données pour une date spécifique dans AsyncStorage
+  const saveDataForDate = async (dateKey, savedButtons) => {
+    try {
+      await AsyncStorage.setItem(dateKey, JSON.stringify(savedButtons));
+      console.log(`Données sauvegardées pour la date : ${dateKey}`);
+    } catch (error) {
+      console.log('Erreur lors de la sauvegarde des données', error);
+    }
+  };
+
+  // Récupérer les données pour une date spécifique
+  const retrieveDataForDate = async (dateKey) => {
+    try {
+      const storedButtons = await AsyncStorage.getItem(dateKey);
+      
+      if (storedButtons) {
+        setButtons(JSON.parse(storedButtons));
+      } else {
+        setButtons([]); // Si pas de données pour cette date, réinitialiser
+      }
+      
+      console.log(`Données récupérées pour la date : ${dateKey}`);
+    } catch (error) {
+      console.log('Erreur lors de la récupération des données', error);
+    }
+  };
+
+  // Sauvegarder les préréglages (presets) dans AsyncStorage
+  const savePresets = async (newPresets) => {
+    try {
+      await AsyncStorage.setItem('presets', JSON.stringify(newPresets));
+      console.log('Presets sauvegardés');
+    } catch (error) {
+      console.log('Erreur lors de la sauvegarde des presets', error);
+    }
+  };
+
+  // Récupérer les préréglages (presets) depuis AsyncStorage
+  const retrievePresets = async () => {
+    try {
+      const storedPresets = await AsyncStorage.getItem('presets');
+      if (storedPresets) {
+        setPresets(JSON.parse(storedPresets));
+      } else {
+        setPresets([{ name: 'Clear', buttons: [] }]); // Par défaut si pas de presets sauvegardés
+      }
+      console.log('Presets récupérés');
+    } catch (error) {
+      console.log('Erreur lors de la récupération des presets', error);
+    }
+  };
+
   // Fonction pour formater la date (tu peux adapter le format comme tu veux)
   const formatDate = (date: Date) => {
     const today = new Date();
@@ -51,21 +114,21 @@ const FirstRoute = () => {
   };
 
   // Fonction pour changer la date
-  const changeDate = (days: number) => {
-    setDate((prevDate) => {
-      const newDate = new Date(prevDate);
-      newDate.setDate(newDate.getDate() + days);
-      return newDate;
-    });
+  const changeDate = (days) => {
+    const newDate = new Date(date);
+    newDate.setDate(newDate.getDate() + days);
+    setDate(newDate);
+    retrieveDataForDate(formatDateKey(newDate)); // Récupérer les données de la nouvelle date
   };
 
   // Fonction pour enregistrer un preset
   const savePreset = () => {
-    if (presetName && !presets.some(p => p.name === presetName)) {
-      setPresets([...presets, { name: presetName, buttons }]); // Enregistrer le preset avec les boutons
-      setPresetName('');
-      setCreateModalVisible(false);
-    }
+    const newPreset = { name: presetName, buttons: buttons }; // Utiliser le nom et les boutons actuels
+    const updatedPresets = [...presets, newPreset]; // Ajouter le nouveau preset à la liste
+    setPresets(updatedPresets); // Mettre à jour l'état
+    savePresets(updatedPresets); // Sauvegarder les presets dans AsyncStorage
+    setCreateModalVisible(false); // Fermer le modal de création
+    setPresetName(''); // Réinitialiser le nom du preset
   };
 
   // Fonction pour sélectionner un preset
@@ -77,6 +140,7 @@ const FirstRoute = () => {
       setSelectedPreset(preset.name); // Mettre à jour le preset sélectionné
       setSelectModalVisible(false); // Fermer le modal
     }
+    saveDataForDate(formatDateKey(date), preset?.buttons || []); // Sauvegarder les boutons pour la date actuelle
   };
 
 
@@ -84,7 +148,9 @@ const FirstRoute = () => {
   const confirmExercise = () => {
     if (selectedIconId) {
       setModalVisible(false);
-      setButtons([...buttons, {
+      
+      // Mettre à jour la liste des boutons avec le nouvel exercice
+      const newButtons = [...buttons, {
         id: buttons.length + 1,
         iconId: selectedIconId,
         mode: selectedMode,
@@ -92,7 +158,14 @@ const FirstRoute = () => {
         reps: reps,
         weight: weight,
         time: time,
-      }]);
+      }];
+      
+      // Met à jour l'état buttons et ensuite sauvegarde les données
+      setButtons(newButtons);
+      
+      // Sauvegarder les boutons pour la date actuelle une fois l'état mis à jour
+      saveDataForDate(formatDateKey(date), newButtons);
+
       setSelectedIconId(null);
       resetModalInputs();
     }
