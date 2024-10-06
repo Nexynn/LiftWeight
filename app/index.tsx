@@ -29,11 +29,12 @@ const FirstRoute = () => {
   const [selectModalVisible, setSelectModalVisible] = React.useState(false);
   const [selectedPreset, setSelectedPreset] = React.useState<string | null>(null);
 
-  const [buttons, setButtons] = React.useState<{ id: number; iconId: number | null, mode: string, series: number, reps: number, weight: number, time: number }[]>([]);
+  const [buttons, setButtons] = React.useState<{ id: number; iconId: number | null, mode: string, equipment: string, sets: number, reps: number, weight: number, time: number }[]>([]);
   const [modalVisible, setModalVisible] = React.useState(false);
   const [selectedIconId, setSelectedIconId] = React.useState<number | null>(null);
   const [selectedMode, setSelectedMode] = React.useState<string>('weighted');
-  const [series, setSeries] = React.useState<number>(0);
+  const [equipmentChoice, setEquipmentChoice] = React.useState<string>('barbell');
+  const [sets, setSets] = React.useState<number>(0);
   const [reps, setReps] = React.useState<number>(0);
   const [weight, setWeight] = React.useState<number>(0);
   const [time, setTime] = React.useState<number>(0);
@@ -154,7 +155,8 @@ const FirstRoute = () => {
         id: buttons.length + 1,
         iconId: selectedIconId,
         mode: selectedMode,
-        series: series,
+        equipment: equipmentChoice,
+        sets: sets,
         reps: reps,
         weight: weight,
         time: time,
@@ -175,7 +177,8 @@ const FirstRoute = () => {
   const resetModalInputs = () => {
     setSelectedIconId(null);
     setSelectedMode('weighted');
-    setSeries(0);
+    setEquipmentChoice('barbell');
+    setSets(0);
     setReps(0);
     setWeight(0);
     setTime(0);
@@ -306,17 +309,17 @@ const FirstRoute = () => {
             {/* Affichage des détails en fonction du mode */}
             {button.mode === 'weighted' && (
               <Text style={styles.exerciseDetails}>
-                {button.series} Series x {button.reps} Reps - {button.weight} kg
+                {button.sets} Sets ({button.equipment})
               </Text>
             )}
             {button.mode === 'timed' && (
               <Text style={styles.exerciseDetails}>
-                {button.series} Series - {button.time} sec
+                {button.sets} Sets ({button.equipment})
               </Text>
             )}
             {button.mode === 'body' && (
               <Text style={styles.exerciseDetails}>
-                {button.series} Series x {button.reps} Reps
+                {button.sets} Sets
               </Text>
             )}
           </TouchableOpacity>
@@ -373,23 +376,40 @@ const FirstRoute = () => {
           </TouchableOpacity>
         </View>
 
+        {(selectedMode === 'weighted' || selectedMode === 'timed') && (
+          <View style={styles.typeButtons}>
+          <TouchableOpacity onPress={() => setEquipmentChoice('barbell')} style={equipmentChoice === 'barbell' ? styles.typeButtonActive : styles.typeButton}>
+              <Text>Barbell</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setEquipmentChoice('dumbbell')} style={equipmentChoice === 'dumbbell' ? styles.typeButtonActive : styles.typeButton}>
+              <Text>Dumbbell</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setEquipmentChoice('machine')} style={equipmentChoice === 'machine' ? styles.typeButtonActive : styles.typeButton}>
+              <Text>Machine</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setEquipmentChoice('plate')} style={equipmentChoice === 'plate' ? styles.typeButtonActive : styles.typeButton}>
+              <Text>Plate</Text>
+            </TouchableOpacity>
+          </View>)}
+
+
         {/* Affichage des champs en fonction du mode sélectionné */}
         {selectedMode === 'weighted' && (
           <View>
-            <TextInput placeholder="Series" keyboardType="numeric" value={series ? series.toString() : ''} onChangeText={(text) => setSeries(Number(text))} style={styles.input} />
+            <TextInput placeholder="Sets" keyboardType="numeric" value={sets ? sets.toString() : ''} onChangeText={(text) => setSets(Number(text))} style={styles.input} />
             <TextInput placeholder="Reps" keyboardType="numeric" value={reps ? reps.toString() : ''} onChangeText={(text) => setReps(Number(text))} style={styles.input} />
             <TextInput placeholder="Weight (kg)" keyboardType="numeric" value={weight ? weight.toString() : ''} onChangeText={(text) => setWeight(Number(text))} style={styles.input} />
           </View>
         )}
         {selectedMode === 'timed' && (
           <View>
-            <TextInput placeholder="Series" keyboardType="numeric" value={series ? series.toString() : ''} onChangeText={(text) => setSeries(Number(text))} style={styles.input} />
+            <TextInput placeholder="Sets" keyboardType="numeric" value={sets ? sets.toString() : ''} onChangeText={(text) => setSets(Number(text))} style={styles.input} />
             <TextInput placeholder="Time (seconds)" keyboardType="numeric" value={reps ? reps.toString() : ''} onChangeText={(text) => setTime(Number(text))} style={styles.input} />
           </View>
         )}
         {selectedMode === 'body' && (
           <View>
-            <TextInput placeholder="Series" keyboardType="numeric" value={series ? series.toString() : ''} onChangeText={(text) => setSeries(Number(text))} style={styles.input} />
+            <TextInput placeholder="Sets" keyboardType="numeric" value={sets ? sets.toString() : ''} onChangeText={(text) => setSets(Number(text))} style={styles.input} />
             <TextInput placeholder="Reps" keyboardType="numeric" value={reps ? reps.toString() : ''} onChangeText={(text) => setReps(Number(text))} style={styles.input} />
           </View>
         )}
