@@ -11,16 +11,23 @@ import BenchIcon from '../assets/icons/bench.png'; // Exemple d'image locale
 
 // Liste des icônes pour les exercices
 const exerciseIcons = [
+  //{ id: 1, name: 'pushpin', type: 'antdesign' },  // Remplacer par d'autres icônes
   { id: 1, name: 'pushpin', type: 'antdesign' },  // Remplacer par d'autres icônes
   { id: 2, name: 'smileo' , type: 'antdesign'},
   { id: 3, name: 'rocket1', type: 'antdesign' },
   { id: 4, name: 'frowno' , type: 'antdesign'},
   { id: 5, name: 'bench', iconComponent: BenchIcon, type: 'custom'},  // Icône personnalisée
+  { id: 6, name: 'bench', iconComponent: BenchIcon, type: 'custom'},  // Icône personnalisée
+  { id: 7, name: 'bench', iconComponent: BenchIcon, type: 'custom'},  // Icône personnalisée
+  { id: 8, name: 'bench', iconComponent: BenchIcon, type: 'custom'},  // Icône personnalisée
+  { id: 9, name: 'bench', iconComponent: BenchIcon, type: 'custom'},  // Icône personnalisée
+  { id: 10, name: 'bench', iconComponent: BenchIcon, type: 'custom'},  // Icône personnalisée
+  { id: 11, name: 'bench', iconComponent: BenchIcon, type: 'custom'},  // Icône personnalisée
   // Ajouter d'autres icônes ici
 ];
 
 
-const FirstRoute = () => {
+const MainRoute = () => {
   const [date, setDate] = React.useState(new Date());
 
   const [presetName, setPresetName] = React.useState<string>('');
@@ -29,7 +36,7 @@ const FirstRoute = () => {
   const [selectModalVisible, setSelectModalVisible] = React.useState(false);
   const [selectedPreset, setSelectedPreset] = React.useState<string | null>(null);
 
-  const [buttons, setButtons] = React.useState<{ id: number; iconId: number | null, mode: string, equipment: string, sets: number, reps: number, weight: number, time: number }[]>([]);
+  const [buttons, setButtons] = React.useState<{ id: number; exerciseName: string, iconId: number | null, mode: string, equipment: string, sets: number, reps: number, weight: number, time: number }[]>([]);
   const [modalVisible, setModalVisible] = React.useState(false);
   const [selectedIconId, setSelectedIconId] = React.useState<number | null>(null);
   const [selectedMode, setSelectedMode] = React.useState<string>('weighted');
@@ -39,11 +46,59 @@ const FirstRoute = () => {
   const [weight, setWeight] = React.useState<number>(0);
   const [time, setTime] = React.useState<number>(0);
 
+  const [exerciseName, setExerciseName] = React.useState('');
+  const [editModalVisible, setEditModalVisible] = React.useState(false);
+  const [selectedExercise, setSelectedExercise] = React.useState(null);
+  const [realReps, setRealReps] = React.useState<number[]>([]);
+  const [realWeight, setRealWeight] = React.useState<number[]>([]);
+
   React.useEffect(() => {
     // Récupérer les données de la date actuelle au chargement
     retrieveDataForDate(formatDateKey(date));
     retrievePresets();
   }, []);
+
+  // Ouvrir le modal pour un exercice spécifique
+  const openExerciseModal = (exercise) => {
+    setSelectedExercise(exercise);
+    setExerciseName(exercise.exerciseName);
+    setSets(exercise.sets);
+    setReps(exercise.reps);
+    setWeight(exercise.weight);
+    setRealReps(exercise.realReps ? exercise.realReps : new Array(exercise.sets).fill(0));
+    setRealWeight(exercise.realWeight ? exercise.realWeight : new Array(exercise.sets).fill(0));
+    setEditModalVisible(true);
+  };
+
+  // Sauvegarder les modifications de l'exercice
+  const saveExerciseChanges = () => {
+    const updatedButtons = buttons.map((btn) =>
+      btn.id === selectedExercise.id
+        ? { ...btn, exerciseName, sets, reps, weight, realReps, realWeight }
+        : btn
+    );
+    setButtons(updatedButtons);
+    setEditModalVisible(false);
+    resetEditModalInputs();
+  };
+
+  // Supprimer l'exercice
+  const deleteExercise = () => {
+    const updatedButtons = buttons.filter((btn) => btn.id !== selectedExercise.id);
+    setButtons(updatedButtons);
+    setEditModalVisible(false);
+    resetEditModalInputs();
+  };
+
+  // Fonction pour réinitialiser les champs du modal
+  const resetEditModalInputs = () => {
+    setExerciseName('');
+    setSets(0);
+    setReps(0);
+    setWeight(0);
+    setRealReps([]);
+    setRealWeight([]);
+  };
 
   // Formater la date en clé pour sauvegarde ("YYYY-MM-DD")
   const formatDateKey = (date) => {
@@ -160,6 +215,9 @@ const FirstRoute = () => {
         reps: reps,
         weight: weight,
         time: time,
+        realReps: new Array(sets).fill(0),
+        realWeight: new Array(sets).fill(0),
+        exerciseName: `Exercise ${buttons.length + 1}`,
       }];
       
       // Met à jour l'état buttons et ensuite sauvegarde les données
@@ -235,6 +293,52 @@ const FirstRoute = () => {
       </TouchableOpacity>
     </View>
 
+    
+
+
+    {!modalVisible && (
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+      {buttons.map((button) => {
+        const icon = exerciseIcons.find((icon) => icon.id === button.iconId);
+        return (
+          <TouchableOpacity key={button.id} style={styles.button} onPress={() => openExerciseModal(button)}>
+            {icon && icon.type === 'antdesign' ? (
+              <AntDesign name={icon.name || "plus"} size={30} color="black" style={styles.icon} />
+            ) : icon && icon.iconComponent ? (
+              <Image source={icon.iconComponent} style={{ width: 25, height: 25 }} />
+            ) : null}
+            
+            {/* Nom de l'exercice */}
+            <Text style={styles.buttonText}>{button.exerciseName}</Text>
+    
+            {/* Affichage des détails en fonction du mode */}
+            {button.mode === 'weighted' && (
+              <Text style={styles.exerciseDetails}>
+                {button.sets} Sets ({button.equipment})
+              </Text>
+            )}
+            {button.mode === 'timed' && (
+              <Text style={styles.exerciseDetails}>
+                {button.sets} Sets ({button.equipment})
+              </Text>
+            )}
+            {button.mode === 'body' && (
+              <Text style={styles.exerciseDetails}>
+                {button.sets} Sets
+              </Text>
+            )}
+          </TouchableOpacity>
+        );
+      })}
+    
+      <TouchableOpacity style={styles.button} onPress={addButtonMenu}>
+        <AntDesign name="plus" size={34} color="black" style={styles.icon} />
+        <Text style={styles.buttonText}>Add exercise</Text>
+      </TouchableOpacity>
+    </ScrollView>
+    )}
+
+
     {/* Modals Create et Select Preset côte à côte */} 
     <Modal visible={createModalVisible || selectModalVisible} animationType="slide" transparent={true}>
       <View style={[styles.modalContainer, { flexDirection: 'row', justifyContent: 'space-around' }]}>
@@ -291,48 +395,92 @@ const FirstRoute = () => {
     </Modal>
 
 
-    {!modalVisible && (
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-      {buttons.map((button) => {
-        const icon = exerciseIcons.find((icon) => icon.id === button.iconId);
-        return (
-          <TouchableOpacity key={button.id} style={styles.button}>
-            {icon && icon.type === 'antdesign' ? (
-              <AntDesign name={icon.name || "plus"} size={30} color="black" style={styles.icon} />
-            ) : icon && icon.iconComponent ? (
-              <Image source={icon.iconComponent} style={{ width: 25, height: 25 }} />
-            ) : null}
+    {/* Modal pour modifier un exercice */}
+    <Modal animationType="slide" transparent={true} visible={editModalVisible} onRequestClose={() => setEditModalVisible(false)}>
+        <View style={styles.modalView}>
+            <Text style={styles.modalTitle}>Edit Exercise</Text>
             
-            {/* Nom de l'exercice */}
-            <Text style={styles.buttonText}>Exercise {button.id}</Text>
-    
-            {/* Affichage des détails en fonction du mode */}
-            {button.mode === 'weighted' && (
-              <Text style={styles.exerciseDetails}>
-                {button.sets} Sets ({button.equipment})
-              </Text>
-            )}
-            {button.mode === 'timed' && (
-              <Text style={styles.exerciseDetails}>
-                {button.sets} Sets ({button.equipment})
-              </Text>
-            )}
-            {button.mode === 'body' && (
-              <Text style={styles.exerciseDetails}>
-                {button.sets} Sets
-              </Text>
-            )}
-          </TouchableOpacity>
-        );
-      })}
-    
-      <TouchableOpacity style={styles.button} onPress={addButtonMenu}>
-        <AntDesign name="plus" size={34} color="black" style={styles.icon} />
-        <Text style={styles.buttonText}>Add exercise</Text>
-      </TouchableOpacity>
-    </ScrollView>
-    
-    )}
+          <TextInput
+              placeholder="Exercise Name"
+              value={exerciseName}
+              onChangeText={setExerciseName}
+              style={styles.input}
+            />
+
+          <View style={styles.editSetButton}>
+          <TextInput
+              placeholder="Sets"
+              keyboardType="numeric"
+              value={sets.toString()}
+              onChangeText={(value) => setSets(Number(value))}
+              style={styles.input}
+            />
+
+            <Text>X</Text>
+            <TextInput
+              placeholder="Reps"
+              keyboardType="numeric"
+              value={reps.toString()}
+              onChangeText={(value) => setReps(Number(value))}
+              style={styles.input}
+            />
+
+            <Text>X</Text>
+            <TextInput
+              placeholder="Weight (kg)"
+              keyboardType="numeric"
+              value={weight.toString()}
+              onChangeText={(value) => setWeight(Number(value))}
+              style={styles.input}
+            />
+          </View>
+
+          {/* Réel nombre de reps et poids */}
+          {Array.from({ length: sets }, (_, index) => (
+            <View key={index} style={styles.editSetButton}>
+              <Text>Set {index + 1}</Text>
+              <TextInput
+                placeholder="Real Reps"
+                keyboardType="numeric"
+                value={realReps[index] ? realReps[index].toString() : ''} // Vérifie que l'index existe
+                onChangeText={(value) => {
+                  const newReps = [...realReps];
+                  const parsedValue = parseInt(value);
+                  newReps[index] = isNaN(parsedValue) ? 0 : parsedValue; // Validation de l'entrée
+                  setRealReps(newReps);
+                }}
+                style={styles.input}
+              />
+              <Text>X</Text>
+              <TextInput
+                placeholder="Real Weight"
+                keyboardType="numeric"
+                value={realWeight[index] ? realWeight[index].toString() : ''} // Vérifie que l'index existe
+                onChangeText={(value) => {
+                  const newWeights = [...realWeight];
+                  const parsedValue = parseInt(value);
+                  newWeights[index] = isNaN(parsedValue) ? 0 : parsedValue; // Validation de l'entrée
+                  setRealWeight(newWeights);
+                }}
+                style={styles.input}
+              />
+            </View>
+          ))}
+
+          <View style={styles.exerciseOptions}>
+            <TouchableOpacity style={styles.modalButton} onPress={saveExerciseChanges}>
+              <Text>Save</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.modalButton} onPress={deleteExercise}>
+              <Text>Delete</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.modalButton} onPress={() => {setEditModalVisible(false); resetEditModalInputs()}}>
+              <Text>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
 
     {/* Modal pour sélectionner l'exercice */}
     <Modal
@@ -344,24 +492,27 @@ const FirstRoute = () => {
       <View style={styles.modalView}>
         <Text style={styles.modalTitle}>Choose the exercise</Text>
 
-        <FlatList
-          data={exerciseIcons}
-          keyExtractor={(item) => item.id.toString()}
-          numColumns={3}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={[styles.iconButton, selectedIconId === item.id && styles.iconSelected]}
-              onPress={() => setSelectedIconId(item.id)}
-            >
-              {item.type === 'antdesign' ? (
-                <AntDesign name={item.name} size={50} color="black" />
-              ) : (
-                <Image source={item.iconComponent} style={{ width: 50, height: 50 }} />
-              )}
-            </TouchableOpacity>
-          )}
-          contentContainerStyle={styles.iconContainer}
-        />
+        <View style={{ height: 300 }}>
+          <FlatList
+            data={exerciseIcons}
+            keyExtractor={(item) => item.id.toString()}
+            numColumns={3}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={[styles.iconButton, selectedIconId === item.id && styles.iconSelected]}
+                onPress={() => setSelectedIconId(item.id)}
+              >
+                {item.type === 'antdesign' ? (
+                  <AntDesign name={item.name} size={50} color="black" />
+                ) : (
+                  <Image source={item.iconComponent} style={{ width: 50, height: 50 }} />
+                )}
+              </TouchableOpacity>
+            )}
+            contentContainerStyle={styles.iconContainer}
+            scrollEnabled={true}
+          />
+        </View>
 
         {/* Sélection du mode */}
         <View style={styles.typeButtons}>
@@ -395,21 +546,25 @@ const FirstRoute = () => {
 
         {/* Affichage des champs en fonction du mode sélectionné */}
         {selectedMode === 'weighted' && (
-          <View>
+          <View style={styles.editSetButton}>
             <TextInput placeholder="Sets" keyboardType="numeric" value={sets ? sets.toString() : ''} onChangeText={(text) => setSets(Number(text))} style={styles.input} />
+            <Text>X</Text>
             <TextInput placeholder="Reps" keyboardType="numeric" value={reps ? reps.toString() : ''} onChangeText={(text) => setReps(Number(text))} style={styles.input} />
-            <TextInput placeholder="Weight (kg)" keyboardType="numeric" value={weight ? weight.toString() : ''} onChangeText={(text) => setWeight(Number(text))} style={styles.input} />
+            <Text>X</Text>
+            <TextInput placeholder="Weight" keyboardType="numeric" value={weight ? weight.toString() : ''} onChangeText={(text) => setWeight(Number(text))} style={styles.input} />
           </View>
         )}
         {selectedMode === 'timed' && (
-          <View>
+          <View style={styles.editSetButton}>
             <TextInput placeholder="Sets" keyboardType="numeric" value={sets ? sets.toString() : ''} onChangeText={(text) => setSets(Number(text))} style={styles.input} />
-            <TextInput placeholder="Time (seconds)" keyboardType="numeric" value={reps ? reps.toString() : ''} onChangeText={(text) => setTime(Number(text))} style={styles.input} />
+            <Text>X</Text>
+            <TextInput placeholder="Time" keyboardType="numeric" value={reps ? reps.toString() : ''} onChangeText={(text) => setTime(Number(text))} style={styles.input} />
           </View>
         )}
         {selectedMode === 'body' && (
-          <View>
+          <View style={styles.editSetButton}>
             <TextInput placeholder="Sets" keyboardType="numeric" value={sets ? sets.toString() : ''} onChangeText={(text) => setSets(Number(text))} style={styles.input} />
+            <Text>X</Text>
             <TextInput placeholder="Reps" keyboardType="numeric" value={reps ? reps.toString() : ''} onChangeText={(text) => setReps(Number(text))} style={styles.input} />
           </View>
         )}
@@ -429,22 +584,32 @@ const FirstRoute = () => {
 };
 
 
-const SecondRoute = () => (
+const FirstRoute = () => (
   <View style={[styles.container, { backgroundColor: '#303030' }]}>
     <Text style={styles.date}>CHARTS</Text>
+    <Text style={styles.date}>Comming soon</Text>
+  </View>
+);
+
+const ThirdRoute = () => (
+  <View style={[styles.container, { backgroundColor: '#303030' }]}>
+    <Text style={styles.date}>SOCIAL</Text>
+    <Text style={styles.date}>Comming soon</Text>
   </View>
 );
 
 export default function App() {
-  const [index, setIndex] = React.useState(0);
+  const [index, setIndex] = React.useState(1);
   const [routes] = React.useState([
     { key: 'first', title: 'Hello' },
-    { key: 'second', title: 'Hi' },
+    { key: 'main', title: 'Hi' },
+    { key: 'third', title: 'Hi' },
   ]);
 
   const renderScene = SceneMap({
     first: FirstRoute,
-    second: SecondRoute,
+    main: MainRoute,
+    third: ThirdRoute,
   });
 
   const [fontsLoaded] = useFonts({
@@ -469,6 +634,7 @@ export default function App() {
       <View style={styles.indicatorContainer}>
         <View style={[styles.indicator, index === 0 ? styles.activeIndicator : null]} />
         <View style={[styles.indicator, index === 1 ? styles.activeIndicator : null]} />
+        <View style={[styles.indicator, index === 2 ? styles.activeIndicator : null]} />
       </View>
     </View>
   );

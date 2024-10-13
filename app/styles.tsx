@@ -70,10 +70,10 @@ const styles = StyleSheet.create({
       borderRadius: 10,
     },
     typeButtons: {
+      marginTop: 40,
       flexDirection: 'row',
       justifyContent: 'space-around',
       width: '100%',
-      marginBottom: 20,
     },
     typeButton: {
       backgroundColor: '#eaeaea',
@@ -91,8 +91,10 @@ const styles = StyleSheet.create({
     },
     modalActions: {
       flexDirection: 'row',
+      position: 'absolute',
       justifyContent: 'space-between',
-      width: '100%',
+      width: '80%',
+      bottom: 50,
     },
     modalButton: {
       backgroundColor: '#eaeaea',
@@ -115,7 +117,7 @@ const styles = StyleSheet.create({
       borderColor: '#ccc',
     },
     iconSelected: {
-      backgroundColor: '#f0f0f0',
+      backgroundColor: 'grey',
     },
     iconContainer: {
       justifyContent: 'center',
@@ -131,7 +133,8 @@ const styles = StyleSheet.create({
       borderRadius: 5,
       padding: 10,
       marginVertical: 10,
-      width: Dimensions.get('window').width * 0.3,
+      margin: 5,
+      width: Dimensions.get('window').width * 0.2,
     },
     selectedType: {
       backgroundColor: '#ccc',
@@ -212,8 +215,15 @@ const styles = StyleSheet.create({
       width: Dimensions.get('window').width * 0.7,
     },
     deleteButton: {
-      
       padding: 5,
+    },
+
+    editSetButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: 5,
+      width: '100%',
     },
   });
 
