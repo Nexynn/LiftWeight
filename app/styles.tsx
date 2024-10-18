@@ -10,7 +10,9 @@ const styles = StyleSheet.create({
     container: {
       flex: 1,
       alignItems: 'center',
-      paddingBottom: 60,
+    },
+    containerKeyboardView: {
+      flex: 1,
     },
     date: {
       fontSize: 20,
@@ -48,8 +50,8 @@ const styles = StyleSheet.create({
       flex: 1,
       backgroundColor: 'white',
       margin: 20,
-      borderRadius: 10,
-      padding: 35,
+      marginTop: 40,
+      borderRadius: 20,
       alignItems: 'center',
     },
     modalTitle: {

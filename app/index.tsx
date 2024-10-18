@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Text, View, StyleSheet, ScrollView, Dimensions, TouchableOpacity, FlatList, Modal, Image, TextInput, ActivityIndicator} from 'react-native';
+import { Text, View, KeyboardAvoidingView, TouchableWithoutFeedback, Platform, Keyboard, ScrollView, Dimensions, Pressable, FlatList, Modal, Image, TextInput, ActivityIndicator} from 'react-native';
 import { TabView, SceneMap } from 'react-native-tab-view';
 import { AntDesign } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -59,7 +59,7 @@ const MainRoute = () => {
   }, []);
 
   // Ouvrir le modal pour un exercice spécifique
-  const openExerciseModal = (exercise) => {
+  const openExerciseModal = (exercise: { id: number; exerciseName: string; sets: number; reps: number; weight: number; realReps?: number[]; realWeight?: number[] }) => {
     setSelectedExercise(exercise);
     setExerciseName(exercise.exerciseName);
     setSets(exercise.sets);
@@ -257,86 +257,87 @@ const MainRoute = () => {
   };
 
   return (
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
     <View style={[styles.container, { backgroundColor: '#303030' }]}>
-      <View style={{ justifyContent: 'center', alignItems: 'center', marginTop: 20, marginBottom: 10 }}>
+      <View style={{ justifyContent: 'center', alignItems: 'center', marginTop: 50, marginBottom: 20 }}>
         {/* Chevron gauche pour diminuer la date */}
-        <TouchableOpacity 
+        <Pressable 
           onPress={() => changeDate(-1)} 
           style={{ position: 'absolute', transform: [{ translateX: -120 }] }}
         >
           <AntDesign name="left" size={24} color="white" />
-        </TouchableOpacity>
+        </Pressable>
 
         {/* Affichage de la date */}
         <Text style={styles.date}>{formatDate(date)}</Text>
 
         {/* Chevron droit pour augmenter la date */}
-        <TouchableOpacity 
+        <Pressable 
           onPress={() => changeDate(1)} 
           style={{ position: 'absolute', transform: [{ translateX: 120 }] }}
         >
           <AntDesign name="right" size={24} color="white" />
-        </TouchableOpacity>
+        </Pressable>
       </View>
 
 
 
-    <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 }}>
-      <TouchableOpacity style={styles.iconButtonPreset} onPress={() => setCreateModalVisible(true)}>
-        <AntDesign name="plus" size={20} color="black" />
-        <Text style={styles.iconLabel}>Create Preset</Text>
-      </TouchableOpacity>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 }}>
+        <Pressable style={styles.iconButtonPreset} onPress={() => setCreateModalVisible(true)}>
+          <AntDesign name="plus" size={20} color="black" />
+          <Text style={styles.iconLabel}>Create Preset</Text>
+        </Pressable>
 
-      <TouchableOpacity style={styles.iconButtonPreset} onPress={() => setSelectModalVisible(true)}>
-        <AntDesign name="bars" size={20} color="black" />
-        <Text style={styles.iconLabel}>Choose Preset</Text>
-      </TouchableOpacity>
-    </View>
+        <Pressable style={styles.iconButtonPreset} onPress={() => setSelectModalVisible(true)}>
+          <AntDesign name="bars" size={20} color="black" />
+          <Text style={styles.iconLabel}>Choose Preset</Text>
+        </Pressable>
+      </View>
 
     
 
 
-    {!modalVisible && (
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-      {buttons.map((button) => {
-        const icon = exerciseIcons.find((icon) => icon.id === button.iconId);
-        return (
-          <TouchableOpacity key={button.id} style={styles.button} onPress={() => openExerciseModal(button)}>
-            {icon && icon.type === 'antdesign' ? (
-              <AntDesign name={icon.name || "plus"} size={30} color="black" style={styles.icon} />
-            ) : icon && icon.iconComponent ? (
-              <Image source={icon.iconComponent} style={{ width: 25, height: 25 }} />
-            ) : null}
-            
-            {/* Nom de l'exercice */}
-            <Text style={styles.buttonText}>{button.exerciseName}</Text>
-    
-            {/* Affichage des détails en fonction du mode */}
-            {button.mode === 'weighted' && (
-              <Text style={styles.exerciseDetails}>
-                {button.sets} Sets ({button.equipment})
-              </Text>
-            )}
-            {button.mode === 'timed' && (
-              <Text style={styles.exerciseDetails}>
-                {button.sets} Sets ({button.equipment})
-              </Text>
-            )}
-            {button.mode === 'body' && (
-              <Text style={styles.exerciseDetails}>
-                {button.sets} Sets
-              </Text>
-            )}
-          </TouchableOpacity>
-        );
-      })}
-    
-      <TouchableOpacity style={styles.button} onPress={addButtonMenu}>
-        <AntDesign name="plus" size={34} color="black" style={styles.icon} />
-        <Text style={styles.buttonText}>Add exercise</Text>
-      </TouchableOpacity>
-    </ScrollView>
-    )}
+      {!modalVisible && (
+        <ScrollView contentContainerStyle={styles.scrollContainer}>
+        {buttons.map((button) => {
+          const icon = exerciseIcons.find((icon) => icon.id === button.iconId);
+          return (
+            <Pressable key={button.id} style={styles.button} onPress={() => openExerciseModal(button)}>
+              {icon && icon.type === 'antdesign' ? (
+                <AntDesign name={icon.name || "plus"} size={30} color="black" style={styles.icon} />
+              ) : icon && icon.iconComponent ? (
+                <Image source={icon.iconComponent} style={{ width: 25, height: 25 }} />
+              ) : null}
+              
+              {/* Nom de l'exercice */}
+              <Text style={styles.buttonText}>{button.exerciseName}</Text>
+      
+              {/* Affichage des détails en fonction du mode */}
+              {button.mode === 'weighted' && (
+                <Text style={styles.exerciseDetails}>
+                  {button.sets} Sets ({button.equipment})
+                </Text>
+              )}
+              {button.mode === 'timed' && (
+                <Text style={styles.exerciseDetails}>
+                  {button.sets} Sets ({button.equipment})
+                </Text>
+              )}
+              {button.mode === 'body' && (
+                <Text style={styles.exerciseDetails}>
+                  {button.sets} Sets
+                </Text>
+              )}
+            </Pressable>
+          );
+        })}
+      
+        <Pressable style={styles.button} onPress={addButtonMenu}>
+          <AntDesign name="plus" size={34} color="black" style={styles.icon} />
+          <Text style={styles.buttonText}>Add exercise</Text>
+        </Pressable>
+      </ScrollView>
+      )}
 
 
     {/* Modals Create et Select Preset côte à côte */} 
@@ -354,12 +355,12 @@ const MainRoute = () => {
               style={styles.input}
             />
             <View style={styles.modalButtons}>
-              <TouchableOpacity style={styles.modalButton} onPress={() => setCreateModalVisible(false)}>
+              <Pressable style={styles.modalButton} onPress={() => setCreateModalVisible(false)}>
                 <Text>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.modalButton} onPress={savePreset}>
+              </Pressable>
+              <Pressable style={styles.modalButton} onPress={savePreset}>
                 <Text>Save</Text>
-              </TouchableOpacity>
+              </Pressable>
             </View>
           </View>
         )}
@@ -373,21 +374,21 @@ const MainRoute = () => {
               keyExtractor={(item) => item.name}
               renderItem={({ item }) => (
                 <View style={styles.presetItemContainer}>
-                  <TouchableOpacity style={styles.presetItem} onPress={() => selectPreset(item.name)}>
+                  <Pressable style={styles.presetItem} onPress={() => selectPreset(item.name)}>
                     <Text style={styles.presetText}>{item.name}</Text>
-                  </TouchableOpacity>
+                  </Pressable>
                   {/* Afficher le bouton de suppression uniquement si ce n'est pas le preset "Clear" */}
                   {item.name !== 'Clear' && (
-                    <TouchableOpacity onPress={() => deletePreset(item.name)} style={styles.deleteButton}>
+                    <Pressable onPress={() => deletePreset(item.name)} style={styles.deleteButton}>
                       <AntDesign name="delete" size={24} color="red" />
-                    </TouchableOpacity>
+                    </Pressable>
                   )}
                 </View>
               )}
             />
-            <TouchableOpacity style={styles.modalButtonClosePreset} onPress={() => setSelectModalVisible(false)}>
+            <Pressable style={styles.modalButtonClosePreset} onPress={() => setSelectModalVisible(false)}>
               <Text>Close</Text>
-            </TouchableOpacity>
+            </Pressable>
           </View>
         )}
 
@@ -468,15 +469,15 @@ const MainRoute = () => {
           ))}
 
           <View style={styles.exerciseOptions}>
-            <TouchableOpacity style={styles.modalButton} onPress={saveExerciseChanges}>
+            <Pressable style={styles.modalButton} onPress={saveExerciseChanges}>
               <Text>Save</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.modalButton} onPress={deleteExercise}>
+            </Pressable>
+            <Pressable style={styles.modalButton} onPress={deleteExercise}>
               <Text>Delete</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.modalButton} onPress={() => {setEditModalVisible(false); resetEditModalInputs()}}>
+            </Pressable>
+            <Pressable style={styles.modalButton} onPress={() => {setEditModalVisible(false); resetEditModalInputs()}}>
               <Text>Cancel</Text>
-            </TouchableOpacity>
+            </Pressable>
           </View>
         </View>
       </Modal>
@@ -498,7 +499,7 @@ const MainRoute = () => {
             keyExtractor={(item) => item.id.toString()}
             numColumns={3}
             renderItem={({ item }) => (
-              <TouchableOpacity
+              <Pressable
                 style={[styles.iconButton, selectedIconId === item.id && styles.iconSelected]}
                 onPress={() => setSelectedIconId(item.id)}
               >
@@ -507,7 +508,7 @@ const MainRoute = () => {
                 ) : (
                   <Image source={item.iconComponent} style={{ width: 50, height: 50 }} />
                 )}
-              </TouchableOpacity>
+              </Pressable>
             )}
             contentContainerStyle={styles.iconContainer}
             scrollEnabled={true}
@@ -516,70 +517,78 @@ const MainRoute = () => {
 
         {/* Sélection du mode */}
         <View style={styles.typeButtons}>
-          <TouchableOpacity onPress={() => setSelectedMode('weighted')} style={selectedMode === 'weighted' ? styles.typeButtonActive : styles.typeButton}>
+          <Pressable onPress={() => setSelectedMode('weighted')} style={selectedMode === 'weighted' ? styles.typeButtonActive : styles.typeButton}>
             <Text>Weighted</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => setSelectedMode('timed')} style={selectedMode === 'timed' ? styles.typeButtonActive : styles.typeButton}>
+          </Pressable>
+          <Pressable onPress={() => setSelectedMode('timed')} style={selectedMode === 'timed' ? styles.typeButtonActive : styles.typeButton}>
             <Text>Timed</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => setSelectedMode('body')} style={selectedMode === 'body' ? styles.typeButtonActive : styles.typeButton}>
+          </Pressable>
+          <Pressable onPress={() => setSelectedMode('body')} style={selectedMode === 'body' ? styles.typeButtonActive : styles.typeButton}>
             <Text>Body</Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
 
         {(selectedMode === 'weighted' || selectedMode === 'timed') && (
           <View style={styles.typeButtons}>
-          <TouchableOpacity onPress={() => setEquipmentChoice('barbell')} style={equipmentChoice === 'barbell' ? styles.typeButtonActive : styles.typeButton}>
+          <Pressable onPress={() => setEquipmentChoice('barbell')} style={equipmentChoice === 'barbell' ? styles.typeButtonActive : styles.typeButton}>
               <Text>Barbell</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => setEquipmentChoice('dumbbell')} style={equipmentChoice === 'dumbbell' ? styles.typeButtonActive : styles.typeButton}>
+            </Pressable>
+            <Pressable onPress={() => setEquipmentChoice('dumbbell')} style={equipmentChoice === 'dumbbell' ? styles.typeButtonActive : styles.typeButton}>
               <Text>Dumbbell</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => setEquipmentChoice('machine')} style={equipmentChoice === 'machine' ? styles.typeButtonActive : styles.typeButton}>
+            </Pressable>
+            <Pressable onPress={() => setEquipmentChoice('machine')} style={equipmentChoice === 'machine' ? styles.typeButtonActive : styles.typeButton}>
               <Text>Machine</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => setEquipmentChoice('plate')} style={equipmentChoice === 'plate' ? styles.typeButtonActive : styles.typeButton}>
+            </Pressable>
+            <Pressable onPress={() => setEquipmentChoice('plate')} style={equipmentChoice === 'plate' ? styles.typeButtonActive : styles.typeButton}>
               <Text>Plate</Text>
-            </TouchableOpacity>
+            </Pressable>
           </View>)}
 
 
         {/* Affichage des champs en fonction du mode sélectionné */}
         {selectedMode === 'weighted' && (
           <View style={styles.editSetButton}>
-            <TextInput placeholder="Sets" keyboardType="numeric" value={sets ? sets.toString() : ''} onChangeText={(text) => setSets(Number(text))} style={styles.input} />
+            <TextInput placeholder="Sets" placeholderTextColor="gray" keyboardType="numeric" value={sets ? sets.toString() : ''}
+              onChangeText={(text) => setSets(Number(text))} style={styles.input} returnKeyType="done" onSubmitEditing={Keyboard.dismiss}/>
             <Text>X</Text>
-            <TextInput placeholder="Reps" keyboardType="numeric" value={reps ? reps.toString() : ''} onChangeText={(text) => setReps(Number(text))} style={styles.input} />
+            <TextInput placeholder="Reps" placeholderTextColor="gray" keyboardType="numeric" value={reps ? reps.toString() : ''}
+              onChangeText={(text) => setReps(Number(text))} style={styles.input} returnKeyType="done" onSubmitEditing={Keyboard.dismiss}/>
             <Text>X</Text>
-            <TextInput placeholder="Weight" keyboardType="numeric" value={weight ? weight.toString() : ''} onChangeText={(text) => setWeight(Number(text))} style={styles.input} />
+            <TextInput placeholder="Weight" placeholderTextColor="gray" keyboardType="numeric" value={weight ? weight.toString() : ''}
+              onChangeText={(text) => setWeight(Number(text))} style={styles.input} returnKeyType="done" onSubmitEditing={Keyboard.dismiss}/>
           </View>
         )}
         {selectedMode === 'timed' && (
           <View style={styles.editSetButton}>
-            <TextInput placeholder="Sets" keyboardType="numeric" value={sets ? sets.toString() : ''} onChangeText={(text) => setSets(Number(text))} style={styles.input} />
+            <TextInput placeholder="Sets" placeholderTextColor="gray" keyboardType="numeric" value={sets ? sets.toString() : ''}
+              onChangeText={(text) => setSets(Number(text))} style={styles.input} returnKeyType="done" onSubmitEditing={Keyboard.dismiss}/>
             <Text>X</Text>
-            <TextInput placeholder="Time" keyboardType="numeric" value={reps ? reps.toString() : ''} onChangeText={(text) => setTime(Number(text))} style={styles.input} />
+            <TextInput placeholder="Time" placeholderTextColor="gray" keyboardType="numeric" value={reps ? reps.toString() : ''}
+              onChangeText={(text) => setTime(Number(text))} style={styles.input} returnKeyType="done" onSubmitEditing={Keyboard.dismiss}/>
           </View>
         )}
         {selectedMode === 'body' && (
           <View style={styles.editSetButton}>
-            <TextInput placeholder="Sets" keyboardType="numeric" value={sets ? sets.toString() : ''} onChangeText={(text) => setSets(Number(text))} style={styles.input} />
+            <TextInput placeholder="Sets" placeholderTextColor="gray" keyboardType="numeric" value={sets ? sets.toString() : ''}
+              onChangeText={(text) => setSets(Number(text))} style={styles.input} returnKeyType="done" onSubmitEditing={Keyboard.dismiss}/>
             <Text>X</Text>
-            <TextInput placeholder="Reps" keyboardType="numeric" value={reps ? reps.toString() : ''} onChangeText={(text) => setReps(Number(text))} style={styles.input} />
+            <TextInput placeholder="Reps" placeholderTextColor="gray" keyboardType="numeric" value={reps ? reps.toString() : ''} 
+              onChangeText={(text) => setReps(Number(text))} style={styles.input} returnKeyType="done" onSubmitEditing={Keyboard.dismiss}/>
           </View>
         )}
 
           <View style={styles.modalActions}>
-            <TouchableOpacity style={styles.modalButton} onPress={cancelExercise}>
+            <Pressable style={styles.modalButton} onPress={cancelExercise}>
               <Text>Cancel</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.modalButton} onPress={confirmExercise}>
+            </Pressable>
+            <Pressable style={styles.modalButton} onPress={confirmExercise}>
               <Text>Confirm</Text>
-            </TouchableOpacity>
+            </Pressable>
           </View>
         </View>
       </Modal>
     </View>
+    </TouchableWithoutFeedback>
   );
 };
 
